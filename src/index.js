@@ -1,11 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+function FileInput({ handleChange }) {
+	return (
+		<input type="file" onChange={(e) => handleChange(e)} />
+	);
+}
+
 function App() {
+	const [file, setFile] = useState('');
+
+	const handleChange = e => {
+		setFile(URL.createObjectURL(e.target.files[0]));
+	}
+
   return (
-    <div className="App">
-    </div>
+  	<div>
+    	<FileInput 
+    	handleChange={handleChange}
+    	/>
+    	<img src={file} alt="" />
+  	</div>
   );
 }
 
