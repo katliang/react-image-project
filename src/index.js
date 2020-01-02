@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 import './index.css';
@@ -13,12 +13,24 @@ const ColoredDiv = styled.div`
   background-color: ${props => props.rgba};
   height:20px;
   width:20px;
+  display:inline-block;
 `
 
-function IsolateColorButton({ rgba, isolateColor }) {
+const StyledText = styled.div`
+  font-size:16px;
+`
+
+function SelectColorText({ file }) {
+  if (!file) return null;
+  return (
+    <StyledText>Select a color from your image.</StyledText>
+  );
+}
+
+function SelectedColor({ rgba }) {
   if (!rgba) return null;
   return (
-    <button onClick={() => isolateColor() }>Isolate color</button>
+    <StyledText>Selected color: <ColoredDiv rgba={rgba} /></StyledText>
   );
 }
 
@@ -81,14 +93,19 @@ function App() {
     newContext.putImageData(pixel, 0, 0);
   }
 
+  useEffect(() => {
+    if (r == "" && g == "" && b == "") return;
+    isolateColor();
+  });
+
   return (
     <div>
       <FileInput handleChange={handleChange} />
-      <canvas ref={canvasRef} width="600" height="600" onClick={(e) => getColor(e)} />
+      <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
       <img ref={imageRef} src={file} alt="" className="hidden" onLoad={() => updateCanvas(file)} />
-      <ColoredDiv rgba={rgba} />{rgba}
-      <IsolateColorButton rgba={rgba} isolateColor={isolateColor} />
-      <canvas ref={updatedCanvasRef} width="600" height="600" />
+      <SelectColorText file={file} />
+      <SelectedColor rgba={rgba} />
+      <canvas ref={updatedCanvasRef} width="300" height="300" />
     </div>
   );
 }
