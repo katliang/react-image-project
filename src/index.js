@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import './index.css';
 
 function FileInput({ handleChange }) {
   return (
@@ -30,6 +29,10 @@ const FlexContainer = styled.div`
   & > * {
     margin: 10px;
   }
+`
+
+const HiddenImage = styled.img`
+  display: none;
 `
 
 function SelectColorText({ file }) {
@@ -116,7 +119,7 @@ function App() {
         <StyledText>Choose an image: </StyledText>
         <FileInput handleChange={handleChange} />
         <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
-        <img ref={imageRef} src={file} alt="" className="hidden" onLoad={() => updateCanvas(file)} />
+        <HiddenImage ref={imageRef} src={file} alt="user-upload" onLoad={() => updateCanvas(file)} />
         <SelectColorText file={file} />
         <SelectedColor rgba={rgba} />
         <canvas ref={updatedCanvasRef} width="300" height="300" />
