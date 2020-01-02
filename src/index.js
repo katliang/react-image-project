@@ -11,13 +11,25 @@ function FileInput({ handleChange }) {
 
 const ColoredDiv = styled.div`
   background-color: ${props => props.rgba};
-  height:20px;
-  width:20px;
-  display:inline-block;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
 `
 
 const StyledText = styled.div`
-  font-size:16px;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+`
+
+const FlexContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+
+  & > * {
+    margin: 10px;
+  }
 `
 
 function SelectColorText({ file }) {
@@ -94,18 +106,21 @@ function App() {
   }
 
   useEffect(() => {
-    if (r == "" && g == "" && b == "") return;
+    if (r === "" && g === "" && b === "") return;
     isolateColor();
   });
 
   return (
     <div>
-      <FileInput handleChange={handleChange} />
-      <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
-      <img ref={imageRef} src={file} alt="" className="hidden" onLoad={() => updateCanvas(file)} />
-      <SelectColorText file={file} />
-      <SelectedColor rgba={rgba} />
-      <canvas ref={updatedCanvasRef} width="300" height="300" />
+      <FlexContainer>
+        <StyledText>Choose an image: </StyledText>
+        <FileInput handleChange={handleChange} />
+        <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
+        <img ref={imageRef} src={file} alt="" className="hidden" onLoad={() => updateCanvas(file)} />
+        <SelectColorText file={file} />
+        <SelectedColor rgba={rgba} />
+        <canvas ref={updatedCanvasRef} width="300" height="300" />
+      </FlexContainer>
     </div>
   );
 }
