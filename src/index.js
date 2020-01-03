@@ -64,9 +64,11 @@ function isValidImage(url, callback) {
   image.src = url;
 }
 
-function clearCanvas(canvas) {
+function clearCanvas(canvas, imageWidth, imageHeight) {
   const context = canvas.getContext('2d');
-  context.clearRect(0, 0, 300, 300);
+  if (imageWidth && imageHeight) {
+    context.clearRect(0, 0, imageWidth, imageHeight);
+  }
 }
 
 function App() {
@@ -79,6 +81,8 @@ function App() {
   const imageRef = useRef(null);
   const updatedCanvasRef = useRef(null);
   const invalidFileErrorMsg = "Oops, that doesn't look like a valid image file. Please try again.";
+  const [imageWidth, setImageWidth] = useState(0);
+  const [imageHeight, setImageHeight] = useState(0);
 
   const getFile = e => {
     if (e.target.files[0]) {
@@ -87,25 +91,34 @@ function App() {
         if (isValid) {
           setFile(uploadFile);
         } else {
-          clearCanvas(canvasRef.current);
+          clearCanvas(canvasRef.current, imageWidth, imageHeight);
           setFile('');
           setRgba('');
           alert(invalidFileErrorMsg);
         }
       });
     } else {
-      clearCanvas(canvasRef.current);
+      clearCanvas(canvasRef.current, imageWidth, imageHeight);
       setFile('');
       setRgba('');
       alert(invalidFileErrorMsg);
     }
   }
 
+  const getImageHeightWidth = () => {
+    const image = imageRef.current;
+    setImageWidth(image.width);
+    setImageHeight(image.height);
+  }
+
   const updateCanvas = () => {
     const canvas = canvasRef.current;
     const image = imageRef.current;
+    canvas.width = imageWidth;
+    canvas.height = imageHeight;
     const context = canvas.getContext('2d');
     context.drawImage(image, 0, 0);
+
   }
 
   const getColor = e => {
@@ -138,11 +151,14 @@ function App() {
       }
     }
     const newCanvas = updatedCanvasRef.current;
+    newCanvas.width = imageWidth;
+    newCanvas.height = imageHeight;
     const newContext = newCanvas.getContext('2d');
     newContext.putImageData(pixel, 0, 0);
   }
 
   useEffect(() => {
+    updateCanvas();
     isolateColor();
   });
 
@@ -151,11 +167,11 @@ function App() {
       <FlexContainer>
         <StyledText>Choose an image: </StyledText>
         <FileInput getFile={getFile} />
-        <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
-        <HiddenImage ref={imageRef} src={file} alt="user-upload" onLoad={updateCanvas} />
+        <canvas ref={canvasRef} onClick={(e) => getColor(e)} />
+        <HiddenImage ref={imageRef} src={file} alt="user-upload" onLoad={getImageHeightWidth} />
         <SelectColorText file={file} />
         <SelectedColor rgba={rgba} />
-        <canvas ref={updatedCanvasRef} width="300" height="300" />
+        <canvas ref={updatedCanvasRef} />
       </FlexContainer>
     </div>
   );
