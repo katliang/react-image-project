@@ -2,12 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 
-function FileInput({ handleChange }) {
-  return (
-    <input type="file" onChange={(e) => handleChange(e)} />
-  );
-}
-
 const ColoredDiv = styled.div`
   background-color: ${props => props.rgba};
   height: 20px;
@@ -35,6 +29,12 @@ const HiddenImage = styled.img`
   display: none;
 `
 
+function FileInput({ getFile }) {
+  return (
+    <input type="file" onChange={(e) => getFile(e)} />
+  );
+}
+
 function SelectColorText({ file }) {
   if (!file) return null;
   return (
@@ -53,6 +53,22 @@ function isSimilarColor(r1, r2, g1, g2, b1, b2) {
   return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)) < 30;
 }
 
+function isValidImage(url, callback) {
+  const image = new Image();
+  image.onload = function() {
+    callback(true);
+  }
+  image.onerror = function() {
+    callback(false);
+  }
+  image.src = url;
+}
+
+function clearCanvas(canvas) {
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, 300, 300);
+}
+
 function App() {
   const [file, setFile] = useState('');
   const [rgba, setRgba] = useState('');
@@ -62,13 +78,30 @@ function App() {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
   const updatedCanvasRef = useRef(null);
+  const invalidFileErrorMsg = "Oops, that doesn't look like a valid image file. Please try again.";
 
-  const handleChange = e => {
-    setFile(URL.createObjectURL(e.target.files[0]));
+  const getFile = e => {
+    if (e.target.files[0]) {
+      const uploadFile = URL.createObjectURL(e.target.files[0]);
+      isValidImage(uploadFile, function(isValid) {
+        if (isValid) {
+          setFile(uploadFile);
+        } else {
+          clearCanvas(canvasRef.current);
+          setFile('');
+          setRgba('');
+          alert(invalidFileErrorMsg);
+        }
+      });
+    } else {
+      clearCanvas(canvasRef.current);
+      setFile('');
+      setRgba('');
+      alert(invalidFileErrorMsg);
+    }
   }
 
-  const updateCanvas = file => {
-    if (!file) return;
+  const updateCanvas = () => {
     const canvas = canvasRef.current;
     const image = imageRef.current;
     const context = canvas.getContext('2d');
@@ -91,6 +124,7 @@ function App() {
   }
 
   const isolateColor = () => {
+    if (r === "" && g === "" && b === "") return;
     const oldCanvas = canvasRef.current;
     const oldContext = oldCanvas.getContext('2d');
     const pixel = oldContext.getImageData(0, 0, oldCanvas.width, oldCanvas.height);
@@ -109,7 +143,6 @@ function App() {
   }
 
   useEffect(() => {
-    if (r === "" && g === "" && b === "") return;
     isolateColor();
   });
 
@@ -117,9 +150,9 @@ function App() {
     <div>
       <FlexContainer>
         <StyledText>Choose an image: </StyledText>
-        <FileInput handleChange={handleChange} />
+        <FileInput getFile={getFile} />
         <canvas ref={canvasRef} width="300" height="300" onClick={(e) => getColor(e)} />
-        <HiddenImage ref={imageRef} src={file} alt="user-upload" onLoad={() => updateCanvas(file)} />
+        <HiddenImage ref={imageRef} src={file} alt="user-upload" onLoad={updateCanvas} />
         <SelectColorText file={file} />
         <SelectedColor rgba={rgba} />
         <canvas ref={updatedCanvasRef} width="300" height="300" />
