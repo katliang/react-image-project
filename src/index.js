@@ -7,6 +7,8 @@ const ColoredDiv = styled.div`
   height: 20px;
   width: 20px;
   display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 3px;
 `
 
 const StyledText = styled.div`
